@@ -1179,7 +1179,10 @@ BattleCommand_Critical:
 	endc
 	jr nz, .Farfetchd
 	ld a, b
-	cp LUCKY_PUNCH
+	push hl
+	call GetItemIndexFromID
+	cphl16 LUCKY_PUNCH
+	pop hl
 	jr nz, .FocusEnergy
 
 ; +2 critical level
@@ -1202,7 +1205,10 @@ BattleCommand_Critical:
 	endc
 	jr nz, .FocusEnergy
 	ld a, b
-	cp STICK
+	push hl
+	call GetItemIndexFromID
+	cphl16 STICK
+	pop hl
 	jr nz, .FocusEnergy
 
 ; +2 critical level
@@ -1263,10 +1269,10 @@ INCLUDE "data/battle/critical_hit_chances.asm"
 
 INCLUDE "engine/battle/move_effects/triple_kick.asm"
 
-;GetNextTypeMatchupsByte:
-;   ld a, BANK(TypeMatchups)
-;   call GetFarByte
-;   ret
+GetNextTypeMatchupsByte:
+   ld a, BANK(TypeMatchups)
+   call GetFarByte
+   ret
 
 BattleCommand_Stab:
 ; STAB = Same Type Attack Bonus
@@ -1352,9 +1358,9 @@ BattleCommand_Stab:
 	ld hl, TypeMatchups
 
 .TypesLoop:
-	ld a, [hli]
-;	call GetNextTypeMatchupsByte
-;	inc hl
+;	ld a, [hli]
+	call GetNextTypeMatchupsByte
+	inc hl
 
 	cp -1
 	jr z, .end
@@ -1372,8 +1378,8 @@ BattleCommand_Stab:
 .SkipForesightCheck:
 	cp b
 	jr nz, .SkipType
-	ld a, [hl]
-;	call GetNextTypeMatchupsByte
+;	ld a, [hl]
+	call GetNextTypeMatchupsByte
 	cp d
 	jr z, .GotMatchup
 	cp e
@@ -1388,7 +1394,8 @@ BattleCommand_Stab:
 	and %10000000
 	ld b, a
 ; If the target is immune to the move, treat it as a miss and calculate the damage as 0
-	ld a, [hl]
+;	ld a, [hl]
+	call GetNextTypeMatchupsByte
 	and a
 	jr nz, .NotImmune
 	inc a
@@ -1478,9 +1485,9 @@ CheckTypeMatchup:
 	ld [wTypeMatchup], a
 	ld hl, TypeMatchups
 .TypesLoop:
-	ld a, [hli]
-;	call GetNextTypeMatchupsByte
-;	inc hl
+;	ld a, [hli]
+	call GetNextTypeMatchupsByte
+	inc hl
 	cp -1
 	jr z, .End
 	cp -2
@@ -1494,9 +1501,9 @@ CheckTypeMatchup:
 .Next:
 	cp d
 	jr nz, .Nope
-	ld a, [hli]
-;	call GetNextTypeMatchupsByte
-;	inc hl
+;	ld a, [hli]
+	call GetNextTypeMatchupsByte
+	inc hl
 	cp b
 	jr z, .Yup
 	cp c
@@ -1514,9 +1521,9 @@ CheckTypeMatchup:
 	ldh [hDividend + 0], a
 	ldh [hMultiplicand + 0], a
 	ldh [hMultiplicand + 1], a
-	ld a, [hli]
-;	call GetNextTypeMatchupsByte
-;	inc hl
+;	ld a, [hli]
+	call GetNextTypeMatchupsByte
+	inc hl
 	ldh [hMultiplicand + 2], a
 	ld a, [wTypeMatchup]
 	ldh [hMultiplier], a
@@ -1558,7 +1565,7 @@ BattleCommand_ResetTypeMatchup:
 
 INCLUDE "engine/battle/ai/switch.asm"
 
-INCLUDE "data/types/type_matchups.asm"
+;INCLUDE "data/types/type_matchups.asm" - historically, there's been a massive amount of fallout related to moving this to another bank. OH FUCKING WELL, THERE'S NOT ANOTHER OPTION. Either it works or someone else cleans up the mess but this is the ONLY WAY I CAN MAKE 16 BIT ITEMS WORK. 
 
 BattleCommand_DamageVariation:
 ; Modify the damage spread between 85% and 100%.
@@ -2580,7 +2587,10 @@ DittoMetalPowder:
 	push bc
 	call GetOpponentItem
 	ld a, [hl]
-	cp METAL_POWDER
+	push hl
+	call GetItemIndexFromID
+	cphl16 METAL_POWDER
+	pop hl
 	pop bc
 	ret nz
 
@@ -2790,7 +2800,11 @@ ThickClubBoost:
 	push bc
 	push de
 	ld bc, CUBONE
-	ld d, THICK_CLUB
+	push hl
+	ld hl, THICK_CLUB
+	call GetItemIDFromIndex
+	ld d, a
+	pop hl
 	call SpeciesItemBoost
 	if MAROWAK == (CUBONE + 1)
 		inc bc
@@ -2810,7 +2824,11 @@ LightBallBoost:
 	push bc
 	push de
 	ld bc, PIKACHU
-	ld d, LIGHT_BALL
+	push hl
+	ld hl, LIGHT_BALL
+	call GetItemIDFromIndex
+	ld d, a
+	pop hl
 	call SpeciesItemBoost
 	pop de
 	pop bc
@@ -6683,16 +6701,26 @@ GetItemHeldEffect:
 	ret z
 
 	push hl
-	ld hl, ItemAttributes + ITEMATTR_EFFECT
-	dec a
-	ld c, a
-	ld b, 0
-	ld a, ITEMATTR_STRUCT_LENGTH
-	call AddNTimes
+	call GetItemIndexFromID
+	ld b, h
+	ld c, l
 	ld a, BANK(ItemAttributes)
-	call GetFarWord
-	ld b, l
-	ld c, h
+	ld hl, ItemAttributes
+	call LoadIndirectPointer
+
+	ld bc, ITEMATTR_EFFECT
+	add hl, bc
+
+	ld a, BANK(ItemAttributes)
+	call GetFarByte
+
+	ld b, a
+
+	inc hl
+	ld a, BANK(ItemAttributes)
+	call GetFarByte
+
+	ld c, a
 	pop hl
 	ret
 
