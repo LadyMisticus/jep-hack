@@ -1864,43 +1864,12 @@ Pokedex_OrderMonsByMode:
 	dw Pokedex_ABCMode
 
 .OldMode:
-	ld a, [wDexLastSeenValue] ;known to be non-zero
-	ld c, 9 ;bits are numbered 1-8 (instead of 0-7) because the first dex entry is #001, not #000
-.highest_bit_index_loop
-	dec c
-	add a, a
-	jr nc, .highest_bit_index_loop
-	ld a, [wDexLastSeenIndex]
-	ld l, a
-	ld h, 0
-	ld b, h
-	add hl, hl
-	add hl, hl
-	add hl, hl
-	add hl, bc
-	ld d, h
-	ld e, l
-	ld hl, wPokedexOrder
-	ld c, b ;b = 0
-.old_mode_loop
-	inc bc
-	ld a, c
-	ld [hli], a
-	ld a, b
-	ld [hli], a
-	cp d
-	jr c, .old_mode_loop
-	ld a, c
-	cp e
-	jr c, .old_mode_loop
-	ld hl, wDexListingEnd
-	ld a, e
-	ld [hli], a
-	ld [hl], d
-	ret
+	ld hl, OldPokedexOrder
+	jr .do_dex
 
 .NewMode:
 	ld hl, NewPokedexOrder
+.do_dex
 	ld de, wPokedexOrder
 	ld bc, NUM_POKEMON * 2
 	call CopyBytes
@@ -1985,6 +1954,8 @@ Pokedex_ABCMode:
 INCLUDE "data/pokemon/dex_order_alpha.asm"
 
 INCLUDE "data/pokemon/dex_order_new.asm"
+
+INCLUDE "data/pokemon/dex_order_old.asm"
 
 Pokedex_DisplayModeDescription:
 	xor a

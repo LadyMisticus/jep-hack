@@ -19,12 +19,12 @@ DebugPokemon1Script:
 
 DebugPokemon2Script:
 	opentext
-	getmonname STRING_BUFFER_3, KUWAGUARD
+	getmonname STRING_BUFFER_3, DEOXYS
 	writetext ReceivedDebugPokemonText
 	playsound SFX_CAUGHT_MON
 	waitsfx
 	promptbutton
-	givepoke KUWAGUARD, 31, HEART_STONE
+	givepoke DEOXYS, 31, HEART_STONE
 	closetext
 	end
 
