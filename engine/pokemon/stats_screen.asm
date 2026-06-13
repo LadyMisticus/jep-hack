@@ -426,8 +426,10 @@ StatsScreen_InitUpperHalf:
 	ld [hli], a
 	ld a, "."
 	ld [hli], a
-	lb bc, PRINTNUM_LEADINGZEROS | 2, 3
-	call PrintNum
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 3	; Remove this
+	call PrintNum						; Remove this
+;	call GetPokemonNumber
+;	call PlaceString
 	add sp, 2
 	hlcoord 14, 0
 	call PrintLevel

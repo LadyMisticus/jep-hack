@@ -504,8 +504,10 @@ DisplayHOFMon:
 	ld d, h
 	ld e, l
 	hlcoord 3, 13
-	lb bc, PRINTNUM_LEADINGZEROS | 2, 3
-	call PrintNum
+	lb bc, PRINTNUM_LEADINGZEROS | 2, 3	; Remove this
+	call PrintNum						; Remove this
+;	call GetPokemonNumber
+;	call PlaceString
 	pop hl
 	ld a, [wCurPartySpecies]
 	ld [wNamedObjectIndex], a

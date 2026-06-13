@@ -1720,8 +1720,12 @@ Pokedex_PrintNumberIfOldMode:
 	ld a, d
 	ld de, wPokedexDisplayNumber
 	ld [de], a
-	lb bc, PRINTNUM_LEADINGZEROS | 2, 3
-	call PrintNum
+;	lb bc, PRINTNUM_LEADINGZEROS | 2, 3		; to remove
+;	call PrintNum							; to remove
+	push hl
+	call GetPokemonNumber
+	pop hl
+	call PlaceString
 	pop de
 	pop hl
 	ret

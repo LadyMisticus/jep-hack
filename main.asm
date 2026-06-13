@@ -331,6 +331,7 @@ INCLUDE "data/pokemon/first_stages.asm"
 
 SECTION "bank24 spillover", ROMX
 INCLUDE "engine/games/slot_machine.asm"
+INCLUDE "data/pokemon/dex_numbers.asm"
 
 SECTION "Phone Scripts 1", ROMX
 
